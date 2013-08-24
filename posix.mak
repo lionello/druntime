@@ -169,8 +169,13 @@ $(DRUNTIME): $(OBJS) $(SRCS)
 
 UT_MODULES:=$(patsubst src/%.d,$(OBJDIR)/%,$(SRCS))
 
-unittest : $(UT_MODULES)
+unittest : $(UT_MODULES) $(OBJDIR)/test_stdout
+	$(OBJDIR)/test_stdout >/dev/null
+	$(OBJDIR)/test_stdout 1</dev/null 2>/dev/null ; exit $$(($$? - 1))
 	@echo done
+
+$(OBJDIR)/test_stdout: src/test_stdout.d
+	$(DMD) $(UDFLAGS) -version=druntime_unittest -unittest -of$@ src/test_stdout.d $(SRCS) $(OBJS) -debuglib= -defaultlib=
 
 ifeq ($(OS),freebsd)
 DISABLED_TESTS =
